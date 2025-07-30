@@ -1,0 +1,100 @@
+# 📘 WorkLog 週報系統
+
+> 一套簡潔實用的員工週報填寫與 PDF 輸出系統  
+> 👤 作者：劉敦桐（學生作品）
+
+---
+
+## 🧠 專案簡介
+
+本系統是一個為學生與上班族設計的「每週工時紀錄與週報產出」平台，支援每日工作紀錄、週報合併、PDF 下載與匯出、使用者登入權限控管等功能。
+
+系統採用 Node.js + MSSQL 架構建置，前端以 HTML + CSS + JavaScript 實作，資料格式遵循實際企業流程，適合作為後端開發與資料流整合的求職作品。
+
+---
+
+## ✨ 專案功能
+
+### ✅ 使用者功能
+- [x] 註冊 / 登入（支援角色：Admin / 員工）
+- [x] 新增每日工時紀錄（時間、類型、內容）
+- [x] 預覽本週週報格式（自動組合每日紀錄）
+- [x] 產出週報 PDF 並下載
+- [x] 儲存至資料庫 WeeklyReports 表
+
+### ✅ 管理員功能
+- [x] 查看所有使用者紀錄
+- [ ] 後台介面（開發中）
+
+---
+
+## 🏗️ 系統架構
+
+| 層級 | 技術 |
+|------|------|
+| 前端 | HTML, CSS, JavaScript |
+| 後端 | Node.js（Express） |
+| 資料庫 | Microsoft SQL Server |
+| PDF 產出 | pdfkit |
+| 字型支援 | NotoSansTC (中文 PDF 字體) |
+
+---
+
+## 🗂️ 資料表結構簡述
+
+### 1️⃣ Users
+- 使用者帳號與角色管理
+
+### 2️⃣ WorkLogs
+- 每日工時紀錄（含起始時間、類型、說明）
+
+### 3️⃣ WeeklyReports
+- 每週工時整合與文字週報儲存
+
+---
+
+## 📁 專案目錄結構（摘要）
+
+WorkLog/
+├── public/ # 前端 HTML/CSS/JS
+│ └── weeklyReport.html # 使用者週報畫面
+├── routes/
+│ └── weeklyReport.js # API 路由與 PDF 處理
+├── db.js # MSSQL 連線設定
+├── server.js # 主伺服器入口
+├── fonts/
+│ └── NotoSansTC-Regular.otf # PDF中文字體
+└── README.md
+
+
+## 💾 如何啟動本專案
+
+1. **安裝依賴套件**
+   ```bash
+   npm install
+建立 .env 檔案設定 DB
+
+env
+DB_USER=your_user
+DB_PASSWORD=your_password
+DB_DATABASE=your_database
+DB_SERVER=localhost
+DB_PORT=1433
+啟動伺服器
+
+
+node server.js
+開啟瀏覽器
+
+http://localhost:3000/weeklyReport.html
+📌 後續規劃
+ 加入使用者介面與登入驗證
+
+ 支援每日記帳（延伸功能）
+
+ 加入週報版本記錄與歷史查詢
+
+ 推上 Render / Azure App Service 線上展示
+
+📧 聯絡方式
+如需聯絡或想瞭解更多後端技能練習紀錄，可至 GitHub 查看更多作品。
