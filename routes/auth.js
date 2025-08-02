@@ -5,15 +5,15 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const { poolPromise } = require('../config/db');
 
-// 用來簽署 JWT 的密鑰（正式環境請改用環境變數 .env）
+// JWT 簽名密鑰（正式環境請用 .env 管理）
 const JWT_SECRET = 'your_secret_key';
 
-// 登入 API：驗證帳密，回傳 JWT token
+// 登入 API
 router.post('/login', async (req, res) => {
   try {
     const { username, password } = req.body;
 
-    // 檢查欄位
+    // 檢查是否有輸入帳密
     if (!username || !password) {
       return res.status(400).json({ error: '請輸入帳號與密碼' });
     }
@@ -30,6 +30,9 @@ router.post('/login', async (req, res) => {
       return res.status(401).json({ error: '使用者不存在' });
     }
 
+    // Debug 輸出密碼比對前的內容
+    console.log('🔐 輸入密碼:', password);
+    console.log('🔑 資料庫密碼雜湊:', user.PasswordHash);
 
     // 驗證密碼
     const isMatch = await bcrypt.compare(password, user.PasswordHash);
@@ -37,14 +40,14 @@ router.post('/login', async (req, res) => {
       return res.status(401).json({ error: '密碼錯誤' });
     }
 
-    // 產生 JWT Token
+    // 密碼正確，產生 JWT
     const token = jwt.sign(
       {
         userId: user.Id,
         role: user.Role
       },
       JWT_SECRET,
-      { expiresIn: '1h' } // 有效時間 1 小時
+      { expiresIn: '1h' }
     );
 
     res.json({ message: '登入成功', token });
