@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const app = express();
+require('dotenv').config(); // 確保 dotenv 在最前面載入
 
 
 app.use(cors());

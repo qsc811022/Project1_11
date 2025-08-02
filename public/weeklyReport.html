@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>填寫週報</title>
+</head>
+
+<body>
+    <h2>週報填寫頁面</h2>
+
+    <form id="reportForm">
+        <!-- 🔹 輸入開始日期 -->
+        <label for="startDate">開始日期：</label>
+        <input type="date" id="startDate" required><br><br>
+
+        <!-- 🔹 輸入結束日期 -->
+        <label for="endDate">結束日期：</label>
+        <input type="date" id="endDate" required><br><br>
+
+        <!-- 🔹 輸入週報內容 -->
+        <label for="content">週報內容：</label><br>
+        <textarea id="content" rows="5" cols="50" required></textarea><br><br>
+
+        <!-- 🔹 提交按鈕 -->
+        <button type="submit">送出</button>
+    </form>
+
+    <script>
+        document.getElementById('reportForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const token = localStorage.getItem('token'); // 從 localStorage 取得 JWT token
+
+            // ⬇️ 前端輸入的值
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            const text = document.getElementById('content').value;
+
+            const reportData = { startDate, endDate, text };
+
+            try {
+                const response = await fetch('/api/weeklyReports', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token
+                    },
+                    body: JSON.stringify(reportData)
+                });
+
+                if (response.ok) {
+                    alert('✅ 週報已送出！');
+                    document.getElementById('reportForm').reset();
+                } else {
+                    const err = await response.json();
+                    alert('❌ 發生錯誤：' + err.error);
+                }
+            } catch (err) {
+                alert('❌ 無法連線到伺服器');
+            }
+        });
+    </script>
+</body>
+
+</html>

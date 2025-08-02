@@ -35,14 +35,16 @@
                     body: new URLSearchParams({ username, password })
                 });
 
-                const data = await res.json();
+                const data = await res.json(); // ✅ 這裡才呼叫一次
                 if (res.ok) {
-                    msg.innerText = '✅ 登入成功，Token：' + data.token;
+                    localStorage.setItem('token', data.token);
+                    window.location.href = '/weeklyReport.html';
                 } else {
                     msg.innerText = '❌ 錯誤：' + data.error;
                 }
             } catch (err) {
                 msg.innerText = '❌ 無法連線到伺服器';
+                console.error(err);
             }
         });
     </script>

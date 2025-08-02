@@ -4,10 +4,10 @@ const router = express.Router();
 const { poolPromise } = require('../config/db');
 const jwt = require('jsonwebtoken'); // 若尚未引入，記得安裝與引入
 
-// 🔧 測試 API：確認是否運作
-router.get('/test', (req, res) => {
-  res.send('✅ weeklyReports API 跑起來了');
-});
+// // 🔧 測試 API：確認是否運作
+// router.get('/test', (req, res) => {
+//   res.send('✅ weeklyReports API 跑起來了');
+// });
 
 // ✅ 新增週報 POST API
 router.post('/', async (req, res) => {
