@@ -31,19 +31,19 @@
             try {
                 const res = await fetch('http://localhost:3000/api/auth/login', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                    body: new URLSearchParams({ username, password })
+                    headers: { 'Content-Type': 'application/json' }, // ✅ 改成 JSON 格式
+                    body: JSON.stringify({ username, password })      // ✅ 改成 JSON 格式
                 });
 
-                const data = await res.json();
+                const data = await res.json(); // ✅ 這邊保留
 
                 if (res.ok) {
-                    // ✅ 存入 token 和使用者名稱
+                    // ✅ 存入 token、使用者名稱與角色
                     localStorage.setItem('token', data.token);
-                    localStorage.setItem('username', data.username);  // 🔥 關鍵補這一行
+                    localStorage.setItem('username', data.username);
+                    localStorage.setItem('role', data.role); // ✅ 關鍵這一行
 
                     window.location.href = '/dashboard.html';
-                    //window.location.href = "/dashboard.html";  // ✅ 改成首頁
                 } else {
                     msg.innerText = '❌ 錯誤：' + data.error;
                 }
@@ -53,6 +53,7 @@
             }
         });
     </script>
+
 </body>
 
 </html>

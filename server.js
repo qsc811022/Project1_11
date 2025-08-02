@@ -12,6 +12,8 @@ app.use(express.urlencoded({ extended: true }));
 const weeklyReportsRouter = require('./routes/weeklyReports');
 const authRoutes = require('./routes/auth');
 const workLogsRoute = require("./routes/workLogs");
+const userRoutes = require('./routes/users');
+app.use("/api/users", userRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/weeklyReports', weeklyReportsRouter);
 app.use("/api/workLogs", workLogsRoute);

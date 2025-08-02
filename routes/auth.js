@@ -41,7 +41,8 @@ router.post('/login', async (req, res) => {
     res.json({
       message: '登入成功',
       token,
-      username: user.Username   // ✅ 傳給前端用
+      username: user.Username,
+      role: user.Role  // ✅ 加上角色資訊  // ✅ 傳給前端用
     });
 
   } catch (err) {

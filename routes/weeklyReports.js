@@ -50,26 +50,57 @@ router.post('/', verifyToken, async (req, res) => {
   }
 });
 
-// ✅ 查詢個人週報 GET /mine
 router.get('/mine', verifyToken, async (req, res) => {
   try {
     const userId = req.user.userId;
+    const { start, end } = req.query;
 
+    let sql = `
+      SELECT Id, StartDate, EndDate, ReportText, CreatedAt
+      FROM WeeklyReports
+      WHERE UserId = @UserId
+    `;
     const pool = await poolPromise;
-    const result = await pool.request()
-      .input('UserId', userId)
-      .query(`
-        SELECT Id, StartDate, EndDate, ReportText, CreatedAt
-        FROM WeeklyReports
-        WHERE UserId = @UserId
-        ORDER BY CreatedAt DESC
-      `);
+    const request = pool.request().input("UserId", userId);
 
+    if (start) {
+      sql += ` AND StartDate >= @StartDate`;
+      request.input("StartDate", start);
+    }
+    if (end) {
+      sql += ` AND EndDate <= @EndDate`;
+      request.input("EndDate", end);
+    }
+
+    sql += ` ORDER BY StartDate DESC`;
+
+    const result = await request.query(sql);
     res.json(result.recordset);
 
   } catch (err) {
-    console.error('❌ 查詢週報失敗:', err);
-    res.status(500).json({ error: '伺服器錯誤，無法查詢週報' });
+    console.error('❌ 篩選週報失敗:', err);
+    res.status(500).json({ error: '伺服器錯誤' });
+  }
+});
+// routes/workLogs.js（新增這段）
+router.get("/byUser/:userId", verifyToken, async (req, res) => {
+  const userId = req.params.userId;
+
+  try {
+    const pool = await poolPromise;
+    const result = await pool.request()
+      .input("UserId", userId)
+      .query(`
+                SELECT w.WorkDate, w.StartTime, w.EndTime, w.WorkType, w.Description, w.IsOvertime, u.Username
+                FROM WorkLogs w
+                JOIN Users u ON w.UserId = u.Id
+                WHERE w.UserId = @UserId
+                ORDER BY w.WorkDate DESC, w.StartTime
+            `);
+    res.json(result.recordset);
+  } catch (err) {
+    console.error("❌ 查詢工時失敗：", err);
+    res.status(500).json({ message: "伺服器錯誤" });
   }
 });
 

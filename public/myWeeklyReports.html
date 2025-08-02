@@ -9,11 +9,19 @@
 <body>
     <div id="userInfo" style="text-align: right; margin: 10px;"></div>
     <h2>📋 我的週報紀錄</h2>
+
+    <h3>查詢條件</h3>
+    開始日：<input type="date" id="startDate">　
+    結束日：<input type="date" id="endDate">
+    <button onclick="loadReports()">查詢</button>
+
+    <hr>
     <ul id="reportList"></ul>
 
     <script>
         const username = localStorage.getItem("username");
         const token = localStorage.getItem("token");
+
         if (!username || !token) {
             alert("請先登入");
             window.location.href = "/login.html";
@@ -21,30 +29,54 @@
             document.getElementById("userInfo").innerText = `👤 使用者：${username}`;
         }
 
-        async function loadMyReports() {
-            const res = await fetch("/api/weeklyReports/mine", {
-                headers: {
-                    Authorization: "Bearer " + token
-                }
-            });
-            const data = await res.json();
-            if (res.ok) {
+        // ✅ 改名為 loadReports，加上查詢條件功能
+        async function loadReports() {
+            const start = document.getElementById("startDate").value;
+            const end = document.getElementById("endDate").value;
+
+            let url = "/api/weeklyReports/mine";
+            const query = [];
+
+            if (start) query.push(`start=${start}`);
+            if (end) query.push(`end=${end}`);
+            if (query.length > 0) url += "?" + query.join("&");
+
+            try {
+                const res = await fetch(url, {
+                    headers: {
+                        Authorization: "Bearer " + token
+                    }
+                });
+
+                const data = await res.json();
                 const ul = document.getElementById("reportList");
                 ul.innerHTML = "";
-                data.forEach(r => {
-                    const li = document.createElement("li");
-                    li.innerHTML = `
-            🗓️ ${r.StartDate.slice(0, 10)} ~ ${r.EndDate.slice(0, 10)}<br>
-            📄 ${r.ReportText}
-            <hr>`;
-                    ul.appendChild(li);
-                });
-            } else {
-                alert("❌ 載入週報失敗：" + data.message);
+
+                if (res.ok) {
+                    if (data.length === 0) {
+                        ul.innerHTML = "<li>（查無資料）</li>";
+                    } else {
+                        data.forEach(r => {
+                            const li = document.createElement("li");
+                            li.innerHTML = `
+                🗓️ ${r.StartDate.slice(0, 10)} ~ ${r.EndDate.slice(0, 10)}<br>
+                📄 ${r.ReportText}
+                <hr>`;
+                            ul.appendChild(li);
+                        });
+                    }
+                } else {
+                    alert("❌ 載入週報失敗：" + data.message);
+                }
+
+            } catch (err) {
+                alert("❌ 無法連線到伺服器");
+                console.error(err);
             }
         }
 
-        loadMyReports();
+        // 預設進來時載入全部紀錄
+        loadReports();
     </script>
 </body>
 

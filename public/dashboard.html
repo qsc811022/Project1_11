@@ -7,6 +7,12 @@
 </head>
 
 <body>
+    <div id="adminSection" style="display: none;">
+        <hr>
+        <h3>🔧 管理者功能</h3>
+        <a href="/admin-all-reports.html">查看所有人週報</a> |
+        <a href="/admin-statistics.html">查看統計資料</a>
+    </div>
     <div id="userInfo" style="text-align: right; margin: 10px;"></div>
 
     <h2>👋 歡迎使用 WorkLog 系統</h2>
@@ -23,12 +29,19 @@
     <script>
         const username = localStorage.getItem("username");
         const token = localStorage.getItem("token");
+        const role = localStorage.getItem("role"); // ✅ 加這一行
 
         if (!username || !token) {
             alert("請先登入");
             window.location.href = "/login.html";
         } else {
+            // 顯示使用者名稱
             document.getElementById("userInfo").innerText = `👤 使用者：${username}`;
+
+            // ✅ 根據角色顯示 admin 功能
+            if (role === 'admin') {
+                document.getElementById("adminSection").style.display = "block";
+            }
         }
 
         function logout() {
