@@ -11,8 +11,10 @@ app.use(express.urlencoded({ extended: true }));
 // ✅ 正確掛載 router
 const weeklyReportsRouter = require('./routes/weeklyReports');
 const authRoutes = require('./routes/auth');
+const workLogsRoute = require("./routes/workLogs");
 app.use('/api/auth', authRoutes);
 app.use('/api/weeklyReports', weeklyReportsRouter);
+app.use("/api/workLogs", workLogsRoute);
 
 
 const PORT = process.env.PORT || 3000;

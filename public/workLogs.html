@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>我的工時紀錄</title>
+    <style>
+        table,
+        th,
+        td {
+            border: 1px solid black;
+            border-collapse: collapse;
+            padding: 8px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="userInfo" style="text-align: right; margin: 10px;"></div>
+    <h2>👀 我的工時紀錄</h2>
+
+    <table id="logTable">
+        <thead>
+            <tr>
+                <th>日期</th>
+                <th>開始時間</th>
+                <th>結束時間</th>
+                <th>類型</th>
+                <th>內容</th>
+                <th>加班</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+
+    <script>
+        // ✅ 顯示登入資訊與檢查
+        const username = localStorage.getItem("username");
+        const token = localStorage.getItem("token");
+        if (!username || !token) {
+            alert("請先登入");
+            window.location.href = "/login.html";
+        } else {
+            document.getElementById("userInfo").innerText = `👤 使用者：${username}`;
+        }
+
+        // ✅ 載入個人工作紀錄
+        async function loadWorkLogs() {
+            try {
+                const res = await fetch("/api/workLogs/mine", {
+                    headers: {
+                        Authorization: "Bearer " + token
+                    }
+                });
+
+                const data = await res.json();
+                if (res.ok) {
+                    const tbody = document.querySelector("#logTable tbody");
+                    tbody.innerHTML = "";
+
+                    data.forEach(log => {
+                        const tr = document.createElement("tr");
+                        tr.innerHTML = `
+              <td>${log.WorkDate.slice(0, 10)}</td>
+              <td>${log.StartTime}</td>
+              <td>${log.EndTime}</td>
+              <td>${log.WorkType}</td>
+              <td>${log.Description}</td>
+              <td>${log.IsOvertime ? "✅" : ""}</td>
+            `;
+                        tbody.appendChild(tr);
+                    });
+                } else {
+                    alert("❌ 查詢失敗：" + data.message);
+                }
+            } catch (err) {
+                alert("❌ 無法載入資料");
+                console.error(err);
+            }
+        }
+
+        loadWorkLogs();
+    </script>
+</body>
+
+</html>

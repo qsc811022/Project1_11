@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>填寫工時</title>
+</head>
+
+<body>
+    <div id="userInfo" style="text-align: right; margin: 10px;"></div>
+
+    <h2>每日工時填寫</h2>
+
+    <form id="logForm">
+        <label>日期：</label>
+        <input type="date" id="workDate" required><br><br>
+
+        <label>時段：</label>
+        <select id="hourSlot" required>
+            <option value="">-- 請選擇 --</option>
+            <option value="09:00-10:00">09:00–10:00</option>
+            <option value="10:00-11:00">10:00–11:00</option>
+            <option value="11:00-12:00">11:00–12:00</option>
+            <option value="13:00-14:00">13:00–14:00</option>
+            <option value="14:00-15:00">14:00–15:00</option>
+            <option value="15:00-16:00">15:00–16:00</option>
+            <option value="16:00-17:00">16:00–17:00</option>
+            <option value="17:00-18:00">17:00–18:00</option>
+            <option value="18:00-19:00">18:00–19:00 🕒 加班</option>
+            <option value="19:00-20:00">19:00–20:00 🕒 加班</option>
+            <option value="20:00-21:00">20:00–21:00 🕒 加班</option>
+        </select><br><br>
+
+        <label>工作類型：</label>
+        <select id="workType" required>
+            <option value="">-- 請選擇 --</option>
+            <option value="開發">開發</option>
+            <option value="測試">測試</option>
+            <option value="會議">會議</option>
+            <option value="文書">文書</option>
+        </select><br><br>
+
+        <label>工作內容：</label><br>
+        <textarea id="workContent" rows="5" cols="50" required></textarea><br><br>
+
+        <button type="submit">送出工時</button>
+    </form>
+
+    <script>
+        // ✅ 顯示登入者
+        const username = localStorage.getItem("username");
+        const token = localStorage.getItem("token");
+        if (!username || !token) {
+            alert("請先登入");
+            window.location.href = "/login.html";
+        } else {
+            document.getElementById("userInfo").innerText = `👤 使用者：${username}`;
+        }
+
+        // ✅ 表單提交
+        document.getElementById("logForm").addEventListener("submit", async (e) => {
+            e.preventDefault();
+
+            const workDate = document.getElementById("workDate").value;
+            const hourSlot = document.getElementById("hourSlot").value;
+            const workType = document.getElementById("workType").value;
+            const description = document.getElementById("workContent").value;
+
+            // 🕐 拆出 startTime 和 endTime
+            const [startTime, endTime] = hourSlot.split("-");
+
+            try {
+                const res = await fetch("/api/workLogs", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": "Bearer " + token
+                    },
+                    body: JSON.stringify({
+                        workDate,
+                        startTime,
+                        endTime,
+                        workType,
+                        description
+                    })
+                });
+
+                const data = await res.json();
+                if (res.ok) {
+                    alert("✅ 工時已成功送出！");
+                    document.getElementById("logForm").reset();
+                } else {
+                    alert("❌ 發生錯誤：" + data.message);
+                }
+            } catch (err) {
+                alert("❌ 無法連線到伺服器");
+                console.error(err);
+            }
+        });
+    </script>
+</body>
+
+</html>

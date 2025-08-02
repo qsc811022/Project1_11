@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>我的週報</title>
+</head>
+
+<body>
+    <div id="userInfo" style="text-align: right; margin: 10px;"></div>
+    <h2>📋 我的週報紀錄</h2>
+    <ul id="reportList"></ul>
+
+    <script>
+        const username = localStorage.getItem("username");
+        const token = localStorage.getItem("token");
+        if (!username || !token) {
+            alert("請先登入");
+            window.location.href = "/login.html";
+        } else {
+            document.getElementById("userInfo").innerText = `👤 使用者：${username}`;
+        }
+
+        async function loadMyReports() {
+            const res = await fetch("/api/weeklyReports/mine", {
+                headers: {
+                    Authorization: "Bearer " + token
+                }
+            });
+            const data = await res.json();
+            if (res.ok) {
+                const ul = document.getElementById("reportList");
+                ul.innerHTML = "";
+                data.forEach(r => {
+                    const li = document.createElement("li");
+                    li.innerHTML = `
+            🗓️ ${r.StartDate.slice(0, 10)} ~ ${r.EndDate.slice(0, 10)}<br>
+            📄 ${r.ReportText}
+            <hr>`;
+                    ul.appendChild(li);
+                });
+            } else {
+                alert("❌ 載入週報失敗：" + data.message);
+            }
+        }
+
+        loadMyReports();
+    </script>
+</body>
+
+</html>

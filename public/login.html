@@ -42,7 +42,8 @@
                     localStorage.setItem('token', data.token);
                     localStorage.setItem('username', data.username);  // 🔥 關鍵補這一行
 
-                    window.location.href = '/weeklyReport.html';
+                    window.location.href = '/dashboard.html';
+                    //window.location.href = "/dashboard.html";  // ✅ 改成首頁
                 } else {
                     msg.innerText = '❌ 錯誤：' + data.error;
                 }
