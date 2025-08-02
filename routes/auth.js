@@ -28,7 +28,6 @@ router.post('/login', async (req, res) => {
       return res.status(401).json({ error: '密碼錯誤' });
     }
 
-    // ✅ 正確使用 .env 裡的 JWT_SECRET
     const token = jwt.sign(
       {
         userId: user.Id,
@@ -38,12 +37,56 @@ router.post('/login', async (req, res) => {
       { expiresIn: '1h' }
     );
 
-    res.json({ message: '登入成功', token });
+    // ✅ 加上這裡
+    res.json({
+      message: '登入成功',
+      token,
+      username: user.Username   // ✅ 傳給前端用
+    });
 
   } catch (err) {
     console.error('❌ 登入失敗:', err);
     res.status(500).json({ error: '伺服器錯誤' });
   }
 });
+
+// 註冊 API
+router.post("/register", async (req, res) => {
+  const { username, password, role } = req.body;
+
+  try {
+    const pool = await poolPromise;
+
+    // 1. 檢查帳號是否已存在
+    const checkUserResult = await pool.request()
+      .input("username", username)
+      .query("SELECT * FROM Users WHERE Username = @username");
+
+    if (checkUserResult.recordset.length > 0) {
+      return res.status(400).json({ message: "此帳號已被註冊" });
+    }
+
+    // 2. 密碼加密
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const createdAt = new Date();
+
+    // 3. 寫入新使用者
+    await pool.request()
+      .input("username", username)
+      .input("password", hashedPassword)
+      .input("role", role)
+      .input("createdAt", createdAt)
+      .query(`INSERT INTO Users (Username, PasswordHash, Role, CreatedAt)
+              VALUES (@username, @password, @role, @createdAt)`);
+
+    res.status(201).json({ message: "註冊成功！" });
+  } catch (err) {
+    console.error("❌ 註冊錯誤：", err);
+    res.status(500).json({ message: "伺服器錯誤" });
+  }
+});
+
+
+
 
 module.exports = router;

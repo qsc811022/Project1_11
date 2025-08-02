@@ -1,0 +1,47 @@
+<!-- public/register.html -->
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>註冊</title>
+</head>
+
+<body>
+    <h2>註冊帳號</h2>
+    <form id="registerForm">
+        <label>帳號：</label>
+        <input type="text" id="username" required /><br /><br />
+
+        <label>密碼：</label>
+        <input type="password" id="password" required /><br /><br />
+
+        <label>角色：</label>
+        <select id="role">
+            <option value="user">user</option>
+            <option value="admin">admin</option>
+        </select><br /><br />
+
+        <button type="submit">註冊</button>
+    </form>
+
+    <script>
+        document.getElementById("registerForm").addEventListener("submit", async function (e) {
+            e.preventDefault();
+            const username = document.getElementById("username").value;
+            const password = document.getElementById("password").value;
+            const role = document.getElementById("role").value;
+
+            const res = await fetch("/api/auth/register", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ username, password, role }),
+            });
+
+            const data = await res.json();
+            alert(data.message);
+        });
+    </script>
+</body>
+
+</html>

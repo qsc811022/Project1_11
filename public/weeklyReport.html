@@ -7,6 +7,8 @@
 </head>
 
 <body>
+    <!-- 👤 使用者資訊顯示區 -->
+    <div id="userInfo" style="text-align: right; margin: 10px;"></div>
     <h2>週報填寫頁面</h2>
 
     <form id="reportForm">
@@ -27,6 +29,14 @@
     </form>
 
     <script>
+        const username = localStorage.getItem('username');
+        if (username) {
+            document.getElementById('userInfo').innerText = `👤 使用者：${username}`;
+        } else {
+            alert("請先登入");
+            window.location.href = "/login.html";
+        }
+
         document.getElementById('reportForm').addEventListener('submit', async (e) => {
             e.preventDefault();
 

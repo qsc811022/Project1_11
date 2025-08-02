@@ -35,9 +35,13 @@
                     body: new URLSearchParams({ username, password })
                 });
 
-                const data = await res.json(); // ✅ 這裡才呼叫一次
+                const data = await res.json();
+
                 if (res.ok) {
+                    // ✅ 存入 token 和使用者名稱
                     localStorage.setItem('token', data.token);
+                    localStorage.setItem('username', data.username);  // 🔥 關鍵補這一行
+
                     window.location.href = '/weeklyReport.html';
                 } else {
                     msg.innerText = '❌ 錯誤：' + data.error;
