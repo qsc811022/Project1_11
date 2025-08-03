@@ -5,60 +5,120 @@
     <meta charset="UTF-8" />
     <title>我的工時紀錄</title>
     <style>
-        table,
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        h2 {
+            margin-bottom: 20px;
+            font-size: 24px;
+            color: #333;
+        }
+
+        #userInfo {
+            position: absolute;
+            top: 10px;
+            right: 20px;
+            font-size: 14px;
+        }
+
+        .table-container {
+            background: #fff;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            width: 90%;
+            max-width: 800px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: center;
+        }
+
         th,
         td {
-            border: 1px solid black;
-            border-collapse: collapse;
-            padding: 8px;
+            padding: 12px;
+            border: 1px solid #ccc;
+        }
+
+        th {
+            background-color: #eee;
+        }
+
+        .check-icon {
+            color: green;
+            font-size: 18px;
+            font-weight: bold;
         }
     </style>
+
 </head>
 
 <body>
     <div id="userInfo" style="text-align: right; margin: 10px;"></div>
     <h2>👀 我的工時紀錄</h2>
 
-    <table id="logTable">
-        <thead>
-            <tr>
-                <th>日期</th>
-                <th>開始時間</th>
-                <th>結束時間</th>
-                <th>類型</th>
-                <th>內容</th>
-                <th>加班</th>
-            </tr>
-        </thead>
-        <tbody></tbody>
-    </table>
+    <div class="table-container" id="logTable">
+        <table>
+            <thead>
+                <tr>
+                    <th>日期</th>
+                    <th>開始時間</th>
+                    <th>結束時間</th>
+                    <th>類型</th>
+                    <th>內容</th>
+                    <th>加班</th>
+                </tr>
+            </thead>
+            <tbody id="logTableBody">
+                <!-- 動態插入的資料 -->
+            </tbody>
+        </table>
+    </div>
+
 
     <script>
+        // 取得登入使用者資訊
         const username = localStorage.getItem("username");
         const token = localStorage.getItem("token");
+
+        // 如果沒登入就跳轉
         if (!username || !token) {
             alert("請先登入");
             window.location.href = "/login.html";
         } else {
+            // 顯示登入者資訊
             document.getElementById("userInfo").innerText = `👤 使用者：${username}`;
         }
 
+        // 載入個人工時紀錄
         async function loadWorkLogs() {
             try {
+                // 呼叫 API，附上 JWT Token
                 const res = await fetch("/api/workLogs/mine", {
                     headers: {
                         Authorization: "Bearer " + token
                     }
                 });
 
-                const data = await res.json();
-                if (res.ok) {
-                    const tbody = document.querySelector("#logTable tbody");
-                    tbody.innerHTML = "";
+                const data = await res.json(); // 把回傳資料轉成 JSON
 
+                if (res.ok) {
+                    const tbody = document.querySelector("#logTable tbody"); // 找到表格內容位置
+                    tbody.innerHTML = ""; // 清空表格
+
+                    // 將每筆紀錄產生成 <tr>
                     data.forEach(log => {
                         const tr = document.createElement("tr");
 
+                        // 將開始與結束時間轉為 HH:mm 格式
                         const start = new Date(log.StartTime).toLocaleTimeString("zh-TW", {
                             hour: "2-digit",
                             minute: "2-digit",
@@ -71,15 +131,17 @@
                             hour12: false
                         });
 
+                        // ✅ 使用 class="check-icon" 來顯示加班打勾樣式（CSS控制）
                         tr.innerHTML = `
                         <td>${log.WorkDate.slice(0, 10)}</td>
                         <td>${start}</td>
                         <td>${end}</td>
                         <td>${log.WorkType}</td>
                         <td>${log.Description}</td>
-                        <td>${log.IsOvertime ? "✅" : ""}</td>
+                        <td>${log.IsOvertime ? '<span class="check-icon">✔</span>' : ''}</td>
                     `;
-                        tbody.appendChild(tr);
+
+                        tbody.appendChild(tr); // 加入表格中
                     });
                 } else {
                     alert("❌ 查詢失敗：" + data.message);
@@ -90,6 +152,7 @@
             }
         }
 
+        // 頁面載入時執行
         loadWorkLogs();
     </script>
 </body>

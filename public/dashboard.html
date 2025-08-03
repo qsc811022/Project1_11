@@ -3,51 +3,84 @@
 
 <head>
     <meta charset="UTF-8" />
-    <title>功能首頁</title>
+    <title>功能首頁 - WorkLog 系統</title>
+    <style>
+        body {
+            font-family: "Microsoft JhengHei", sans-serif;
+            background-color: #f7f7f7;
+            padding: 30px;
+        }
+
+        #userInfo {
+            text-align: right;
+            color: #333;
+            font-size: 16px;
+            margin-bottom: 20px;
+        }
+
+        h2 {
+            margin-bottom: 20px;
+        }
+
+        .menu {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .menu-button {
+            flex: 1 1 200px;
+            padding: 20px;
+            text-align: center;
+            border: 1px solid #ccc;
+            border-radius: 12px;
+            background-color: #ffffff;
+            text-decoration: none;
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s ease, background-color 0.2s;
+        }
+
+        .menu-button:hover {
+            transform: translateY(-2px);
+            background-color: #eaf6ff;
+        }
+
+        .emoji {
+            font-size: 22px;
+            margin-right: 8px;
+        }
+    </style>
 </head>
 
 <body>
-    <div id="adminSection" style="display: none;">
-        <hr>
-        <h3>🔧 管理者功能</h3>
-        <a href="/admin-all-reports.html">查看所有人週報</a> |
-        <a href="/admin-statistics.html">查看統計資料</a>
-    </div>
-    <div id="userInfo" style="text-align: right; margin: 10px;"></div>
+    <div id="userInfo"></div>
 
     <h2>👋 歡迎使用 WorkLog 系統</h2>
     <p>請選擇要進行的操作：</p>
 
-    <div style="margin: 10px;">
-        <a href="/dailyLog.html">📝 填寫工時</a> |
-        <a href="/weeklyReport.html">📆 填寫週報</a> |
-        <a href="/workLogs.html">📅 我的每日工時</a> |
-        <a href="/myWeeklyReports.html">📋 我的週報紀錄</a> |
-        <a href="#" onclick="logout()">🚪 登出</a>
+    <div class="menu">
+        <a href="/dailyLog.html" class="menu-button"><span class="emoji">🕘</span>填寫工時</a>
+        <a href="/weeklyReport.html" class="menu-button"><span class="emoji">📋</span>填寫週報</a>
+        <a href="/workLogs.html" class="menu-button"><span class="emoji">📅</span>我的每日工時</a>
+        <a href="/myWeeklyReports.html" class="menu-button"><span class="emoji">🗓️</span>我的週報紀錄</a>
+        <a href="/login.html" onclick="logout()" class="menu-button"><span class="emoji">🚪</span>登出</a>
     </div>
-
     <script>
         const username = localStorage.getItem("username");
-        const token = localStorage.getItem("token");
-        const role = localStorage.getItem("role"); // ✅ 加這一行
-
-        if (!username || !token) {
+        if (!username) {
             alert("請先登入");
             window.location.href = "/login.html";
         } else {
-            // 顯示使用者名稱
             document.getElementById("userInfo").innerText = `👤 使用者：${username}`;
-
-            // ✅ 根據角色顯示 admin 功能
-            if (role === 'admin') {
-                document.getElementById("adminSection").style.display = "block";
-            }
         }
 
         function logout() {
-            localStorage.clear();
-            alert("已登出！");
-            window.location.href = "/login.html";
+            localStorage.removeItem("token");
+            localStorage.removeItem("username");
         }
     </script>
 </body>
