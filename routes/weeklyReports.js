@@ -101,4 +101,55 @@ router.get("/byUser/:userId", verifyToken, async (req, res) => {
   }
 });
 
+// ✅ 後端 API：管理者查詢所有使用者工時紀錄
+router.get("/admin/all", verifyToken, async (req, res) => {
+  const { userId, startDate, endDate } = req.query;
+
+  try {
+    const pool = await poolPromise;
+    const request = pool.request();
+
+    console.log("🔍 後端收到條件：", { userId, startDate, endDate });
+
+    let sqlQuery = `
+      SELECT w.WorkDate, w.StartTime, w.EndTime, w.WorkType, w.Description, w.IsOvertime, u.Username
+      FROM WorkLogs w
+      JOIN Users u ON w.UserId = u.Id
+      WHERE 1=1
+    `;
+
+    if (userId) {
+      console.log("🧪 篩選 UserId =", userId);
+      sqlQuery += ` AND w.UserId = @UserId`;
+      request.input("UserId", sql.Int, Number(userId)); // <--- ✅ 建議改成 Number
+    }
+
+    if (startDate) {
+      sqlQuery += ` AND CONVERT(date, w.WorkDate) >= @StartDate`;
+      request.input("StartDate", sql.Date, new Date(startDate));
+    }
+
+    if (endDate) {
+      sqlQuery += ` AND CONVERT(date, w.WorkDate) <= @EndDate`;
+      request.input("EndDate", sql.Date, new Date(endDate));
+    }
+
+    sqlQuery += ` ORDER BY w.WorkDate DESC, w.StartTime`;
+
+    console.log("📄 最終 SQL 查詢語法：", sqlQuery);
+
+    const result = await request.query(sqlQuery);
+
+    console.log("✅ 回傳筆數：", result.recordset.length);
+    console.table(result.recordset);
+
+    res.json(result.recordset);
+
+  } catch (err) {
+    console.error("❌ 管理者查詢失敗：", err);
+    res.status(500).json({ message: "伺服器錯誤" });
+  }
+});
+
+
 module.exports = router;

@@ -69,8 +69,16 @@
         <a href="/myWeeklyReports.html" class="menu-button"><span class="emoji">🗓️</span>我的週報紀錄</a>
         <a href="/login.html" onclick="logout()" class="menu-button"><span class="emoji">🚪</span>登出</a>
     </div>
+    <!-- ✅ admin 功能按鈕區域 -->
+    <div id="adminSection" style="display: none; margin-top: 30px; text-align: center;">
+        <button onclick="location.href='/adminWorkLogs.html'" style="padding: 12px 24px; font-size: 16px;">
+            🧑‍💼 查看所有人工時紀錄（管理者）
+        </button>
+    </div>
     <script>
         const username = localStorage.getItem("username");
+        const role = localStorage.getItem("role"); // 取得角色
+
         if (!username) {
             alert("請先登入");
             window.location.href = "/login.html";
@@ -81,6 +89,17 @@
         function logout() {
             localStorage.removeItem("token");
             localStorage.removeItem("username");
+            localStorage.removeItem("role");
+        }
+
+        // 如果是 admin，動態插入管理功能按鈕
+        if (role === "admin") {
+            const adminButton = document.createElement("a");
+            adminButton.href = "/adminWorkLogs.html"; // 你要開發的 admin 頁面
+            adminButton.className = "menu-button";
+            adminButton.innerHTML = `<span class="emoji">🧑‍💼</span>管理者：查看所有工時`;
+
+            document.querySelector(".menu").appendChild(adminButton);
         }
     </script>
 </body>

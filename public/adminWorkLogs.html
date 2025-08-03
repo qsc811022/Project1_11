@@ -50,7 +50,14 @@
             document.getElementById("userInfo").innerText = `👑 管理者：${username}`;
         }
 
-        // ✅ 載入所有使用者清單（供下拉查詢用）
+        // ✅ 時間格式轉換器（轉成 HH:mm 顯示）
+        function formatTime(timeStr) {
+            if (!timeStr) return "";
+            const [hour, minute] = timeStr.split(":");
+            return `${hour}:${minute}`;
+        }
+
+        // ✅ 載入所有使用者選單
         async function loadUsers() {
             const res = await fetch("/api/users/all", {
                 headers: { Authorization: "Bearer " + token }
@@ -65,20 +72,33 @@
             });
         }
 
-        // ✅ 查詢工時紀錄（支援使用者與起訖日）
-        async function loadLogs() {
-            const startDate = document.getElementById("startDate").value;
-            const endDate = document.getElementById("endDate").value;
-            const userId = document.getElementById("userSelect").value;
+        // ✅ 查詢工時資料
+        async function loadLogs(init = false) {
+            console.log("✅ 查詢按鈕被按了");
 
-            const query = new URLSearchParams();
-            if (startDate) query.append("startDate", startDate);
-            if (endDate) query.append("endDate", endDate);
-            if (userId) query.append("userId", userId);
+            const tbody = document.getElementById("logTable");
+            tbody.innerHTML = `<tr><td colspan="7">⏳ 載入中...</td></tr>`;
+
+            let url = "/api/workLogs/admin/all";
+            if (!init) {
+                const startDate = document.getElementById("startDate").value;
+                const endDate = document.getElementById("endDate").value;
+                const userId = Number(document.getElementById("userSelect").value);
+
+                const query = new URLSearchParams();
+                if (startDate) query.append("startDate", startDate);
+                if (endDate) query.append("endDate", endDate);
+                if (userId) query.append("userId", userId);
+                console.log("🔍 查詢參數", { userId, startDate, endDate });
+                console.log("🔧 select DOM值 = ", document.getElementById("userSelect").value);
+                url += "?" + query.toString();
+            }
 
             try {
-                const res = await fetch("/api/workLogs/admin/all?" + query.toString(), {
-                    headers: { Authorization: "Bearer " + token }
+                const res = await fetch(url, {
+                    method: "GET",
+                    headers: { Authorization: "Bearer " + token },
+                    cache: "no-store"
                 });
 
                 const data = await res.json();
@@ -87,7 +107,6 @@
                     return alert("❌ 無法取得紀錄：" + (data.message || "未知錯誤"));
                 }
 
-                const tbody = document.getElementById("logTable");
                 tbody.innerHTML = "";
 
                 if (data.length === 0) {
@@ -98,14 +117,14 @@
                 data.forEach(log => {
                     const tr = document.createElement("tr");
                     tr.innerHTML = `
-            <td>${log.Username}</td>
-            <td>${log.WorkDate.slice(0, 10)}</td>
-            <td>${log.StartTime}</td>
-            <td>${log.EndTime}</td>
-            <td>${log.WorkType}</td>
-            <td>${log.Description}</td>
-            <td>${log.IsOvertime ? "✅" : ""}</td>
-          `;
+                        <td>${log.Username}</td>
+                        <td>${log.WorkDate.slice(0, 10)}</td>
+                        <td>${formatTime(log.StartTime)}</td>
+                        <td>${formatTime(log.EndTime)}</td>
+                        <td>${log.WorkType}</td>
+                        <td>${log.Description}</td>
+                        <td>${log.IsOvertime ? "✅" : ""}</td>
+                    `;
                     tbody.appendChild(tr);
                 });
 
@@ -115,9 +134,9 @@
             }
         }
 
-        // 頁面初始載入
+        // ✅ 頁面初始化
         loadUsers();
-        loadLogs();
+        loadLogs(true);
     </script>
 </body>
 
