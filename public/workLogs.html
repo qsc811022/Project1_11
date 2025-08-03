@@ -109,7 +109,12 @@
                 });
 
                 const data = await res.json(); // 把回傳資料轉成 JSON
-
+                // 👉 這邊加入排序：先按照 WorkDate + StartTime 排序
+                data.sort((a, b) => {
+                    const datetimeA = new Date(`${a.WorkDate}T${a.StartTime}`);
+                    const datetimeB = new Date(`${b.WorkDate}T${b.StartTime}`);
+                    return datetimeA - datetimeB;
+                });
                 if (res.ok) {
                     const tbody = document.querySelector("#logTable tbody"); // 找到表格內容位置
                     tbody.innerHTML = ""; // 清空表格
