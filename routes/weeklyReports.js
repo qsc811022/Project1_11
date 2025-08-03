@@ -16,10 +16,7 @@ function verifyToken(req, res, next) {
   });
 }
 
-// ✅ 測試 API
-router.get('/test', (req, res) => {
-  res.send('✅ weeklyReports API 跑起來了');
-});
+
 
 // ✅ 新增週報 POST
 router.post('/', verifyToken, async (req, res) => {

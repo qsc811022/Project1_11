@@ -47,7 +47,7 @@
     </form>
 
     <script>
-        // ✅ 顯示登入者
+        // ✅ 顯示登入者資訊
         const username = localStorage.getItem("username");
         const token = localStorage.getItem("token");
         if (!username || !token) {
@@ -57,7 +57,7 @@
             document.getElementById("userInfo").innerText = `👤 使用者：${username}`;
         }
 
-        // ✅ 表單提交
+        // ✅ 表單提交事件處理
         document.getElementById("logForm").addEventListener("submit", async (e) => {
             e.preventDefault();
 
@@ -66,8 +66,16 @@
             const workType = document.getElementById("workType").value;
             const description = document.getElementById("workContent").value;
 
-            // 🕐 拆出 startTime 和 endTime
+            // ✅ 拆解時間區段為開始與結束時間
             const [startTime, endTime] = hourSlot.split("-");
+
+            // ✅ 合併日期與時間，加上秒數，避免 Invalid Date 問題
+            const fullStartTime = new Date(`${workDate}T${startTime}:00`);
+            const fullEndTime = new Date(`${workDate}T${endTime}:00`);
+
+            // ✅ Log 確認格式正確
+            console.log("🕒 開始時間:", fullStartTime);
+            console.log("🕒 結束時間:", fullEndTime);
 
             try {
                 const res = await fetch("/api/workLogs", {
@@ -78,8 +86,8 @@
                     },
                     body: JSON.stringify({
                         workDate,
-                        startTime,
-                        endTime,
+                        startTime: fullStartTime,
+                        endTime: fullEndTime,
                         workType,
                         description
                     })

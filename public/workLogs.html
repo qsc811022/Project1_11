@@ -34,7 +34,6 @@
     </table>
 
     <script>
-        // ✅ 顯示登入資訊與檢查
         const username = localStorage.getItem("username");
         const token = localStorage.getItem("token");
         if (!username || !token) {
@@ -44,7 +43,6 @@
             document.getElementById("userInfo").innerText = `👤 使用者：${username}`;
         }
 
-        // ✅ 載入個人工作紀錄
         async function loadWorkLogs() {
             try {
                 const res = await fetch("/api/workLogs/mine", {
@@ -60,14 +58,27 @@
 
                     data.forEach(log => {
                         const tr = document.createElement("tr");
+
+                        const start = new Date(log.StartTime).toLocaleTimeString("zh-TW", {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                            hour12: false
+                        });
+
+                        const end = new Date(log.EndTime).toLocaleTimeString("zh-TW", {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                            hour12: false
+                        });
+
                         tr.innerHTML = `
-              <td>${log.WorkDate.slice(0, 10)}</td>
-              <td>${log.StartTime}</td>
-              <td>${log.EndTime}</td>
-              <td>${log.WorkType}</td>
-              <td>${log.Description}</td>
-              <td>${log.IsOvertime ? "✅" : ""}</td>
-            `;
+                        <td>${log.WorkDate.slice(0, 10)}</td>
+                        <td>${start}</td>
+                        <td>${end}</td>
+                        <td>${log.WorkType}</td>
+                        <td>${log.Description}</td>
+                        <td>${log.IsOvertime ? "✅" : ""}</td>
+                    `;
                         tbody.appendChild(tr);
                     });
                 } else {
