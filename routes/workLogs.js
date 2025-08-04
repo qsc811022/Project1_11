@@ -86,24 +86,60 @@ router.get("/mine", verifyToken, async (req, res) => {
     }
 });
 
-// ✅ Admin 查詢所有員工工時紀錄
 router.get("/admin/all", verifyAdmin, async (req, res) => {
     try {
         const pool = await poolPromise;
-        const result = await pool.request().query(`
+        const { userId, startDate, endDate } = req.query;
+        
+        console.log("🔍 收到查詢參數:", { userId, startDate, endDate });
+        
+        let query = `
             SELECT 
-                U.Username, 
-                W.WorkDate, 
-                W.StartTime, 
-                W.EndTime, 
-                W.WorkType, 
-                W.Description, 
+                U.Username,
+                W.WorkDate,
+                W.StartTime,
+                W.EndTime,
+                W.WorkType,
+                W.Description,
                 W.IsOvertime 
             FROM WorkLogs W
             JOIN Users U ON W.UserId = U.Id
-            ORDER BY W.WorkDate DESC, W.StartTime
-        `);
-
+        `;
+        
+        let conditions = [];
+        const request = pool.request();
+        
+        // 添加使用者過濾條件
+        if (userId && userId !== '') {
+            conditions.push('W.UserId = @userId');
+            request.input('userId', parseInt(userId));
+        }
+        
+        // 添加開始日期過濾條件
+        if (startDate && startDate !== '') {
+            conditions.push('W.WorkDate >= @startDate');
+            request.input('startDate', startDate);
+        }
+        
+        // 添加結束日期過濾條件
+        if (endDate && endDate !== '') {
+            conditions.push('W.WorkDate <= @endDate');
+            request.input('endDate', endDate);
+        }
+        
+        // 如果有條件，添加 WHERE 子句
+        if (conditions.length > 0) {
+            query += ' WHERE ' + conditions.join(' AND ');
+        }
+        
+        query += ' ORDER BY W.WorkDate DESC, W.StartTime';
+        
+        console.log("🔧 執行的SQL:", query);
+        
+        const result = await request.query(query);
+        
+        console.log("📊 查詢結果數量:", result.recordset.length);
+        
         res.json(result.recordset);
     } catch (err) {
         console.error("❌ Admin 查詢工時錯誤：", err);

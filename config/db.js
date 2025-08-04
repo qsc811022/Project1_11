@@ -3,7 +3,7 @@ const sql = require('mssql');
 
 // 資料庫連線設定
 const config = {
-  user: 'Tedliu1',
+  user: 'Tedliu',
   password: '1qaz',
   server: 'localhost',         // 或 IP
   database: 'project01',         // 資料庫名稱
