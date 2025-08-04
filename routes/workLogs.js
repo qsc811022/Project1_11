@@ -86,6 +86,7 @@ router.get("/mine", verifyToken, async (req, res) => {
     }
 });
 
+// ✅ 修改後端 SQL 查詢，直接在資料庫層處理時間格式
 router.get("/admin/all", verifyAdmin, async (req, res) => {
     try {
         const pool = await poolPromise;
@@ -97,8 +98,8 @@ router.get("/admin/all", verifyAdmin, async (req, res) => {
             SELECT 
                 U.Username,
                 W.WorkDate,
-                W.StartTime,
-                W.EndTime,
+                CONVERT(varchar(5), W.StartTime, 108) as StartTime,  -- 轉換成 HH:mm 格式
+                CONVERT(varchar(5), W.EndTime, 108) as EndTime,      -- 轉換成 HH:mm 格式
                 W.WorkType,
                 W.Description,
                 W.IsOvertime 
@@ -134,12 +135,7 @@ router.get("/admin/all", verifyAdmin, async (req, res) => {
         
         query += ' ORDER BY W.WorkDate DESC, W.StartTime';
         
-        console.log("🔧 執行的SQL:", query);
-        
         const result = await request.query(query);
-        
-        console.log("📊 查詢結果數量:", result.recordset.length);
-        
         res.json(result.recordset);
     } catch (err) {
         console.error("❌ Admin 查詢工時錯誤：", err);
