@@ -1,76 +1,52 @@
-USE [project01]
-GO
-/****** Object:  Table [dbo].[Users]    Script Date: 2025/8/2 下午 03:10:17 ******/
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE TABLE [dbo].[Users](
-	[Id] [int] IDENTITY(1,1) NOT NULL,
-	[Username] [nvarchar](50) NOT NULL,
-	[PasswordHash] [nvarchar](255) NOT NULL,
-	[Role] [nvarchar](20) NOT NULL,
-	[CreatedAt] [datetime] NOT NULL,
-PRIMARY KEY CLUSTERED 
-(
-	[Id] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY],
-UNIQUE NONCLUSTERED 
-(
-	[Username] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
-) ON [PRIMARY]
-GO
-/****** Object:  Table [dbo].[WeeklyReports]    Script Date: 2025/8/2 下午 03:10:18 ******/
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE TABLE [dbo].[WeeklyReports](
-	[Id] [int] IDENTITY(1,1) NOT NULL,
-	[UserId] [int] NOT NULL,
-	[StartDate] [date] NOT NULL,
-	[EndDate] [date] NOT NULL,
-	[ReportText] [nvarchar](max) NOT NULL,
-	[CreatedAt] [datetime] NOT NULL,
-PRIMARY KEY CLUSTERED 
-(
-	[Id] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
-) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
-GO
-/****** Object:  Table [dbo].[WorkLogs]    Script Date: 2025/8/2 下午 03:10:18 ******/
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE TABLE [dbo].[WorkLogs](
-	[Id] [int] IDENTITY(1,1) NOT NULL,
-	[UserId] [int] NOT NULL,
-	[WorkDate] [date] NOT NULL,
-	[StartTime] [time](7) NOT NULL,
-	[EndTime] [time](7) NOT NULL,
-	[WorkType] [nvarchar](50) NOT NULL,
-	[Description] [nvarchar](255) NULL,
-	[CreatedAt] [datetime] NOT NULL,
-	[IsOvertime] [bit] NULL,
-PRIMARY KEY CLUSTERED 
-(
-	[Id] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
-) ON [PRIMARY]
-GO
-ALTER TABLE [dbo].[Users] ADD  DEFAULT (getdate()) FOR [CreatedAt]
-GO
-ALTER TABLE [dbo].[WeeklyReports] ADD  DEFAULT (getdate()) FOR [CreatedAt]
-GO
-ALTER TABLE [dbo].[WorkLogs] ADD  DEFAULT (getdate()) FOR [CreatedAt]
-GO
-ALTER TABLE [dbo].[WorkLogs] ADD  DEFAULT ((0)) FOR [IsOvertime]
-GO
-ALTER TABLE [dbo].[WeeklyReports]  WITH CHECK ADD FOREIGN KEY([UserId])
-REFERENCES [dbo].[Users] ([Id])
-GO
-ALTER TABLE [dbo].[WorkLogs]  WITH CHECK ADD FOREIGN KEY([UserId])
-REFERENCES [dbo].[Users] ([Id])
-GO
+-- ===============================
+-- 1. 使用者角色表：Roles
+-- ===============================
+CREATE TABLE Roles (
+    Id INT PRIMARY KEY IDENTITY(1,1),
+    RoleName NVARCHAR(20) NOT NULL UNIQUE
+);
+
+-- 預設角色資料
+INSERT INTO Roles (RoleName)
+VALUES ('admin'), ('student'), ('employee');
+
+-- ===============================
+-- 2. 使用者表：Users
+-- ===============================
+CREATE TABLE Users (
+    Id INT PRIMARY KEY IDENTITY(1,1),
+    UserName NVARCHAR(50) NOT NULL UNIQUE,
+    PasswordHash NVARCHAR(255) NOT NULL,
+    RoleId INT NOT NULL,
+    CreatedAt DATETIME NOT NULL DEFAULT GETDATE(),
+    FOREIGN KEY (RoleId) REFERENCES Roles(Id)
+);
+
+-- ===============================
+-- 3. 工作類型表：WorkTypes
+-- ===============================
+CREATE TABLE WorkTypes (
+    Id INT PRIMARY KEY IDENTITY(1,1),
+    TypeName NVARCHAR(50) NOT NULL UNIQUE
+);
+
+-- 預設工作類型資料
+INSERT INTO WorkTypes (TypeName)
+VALUES ('Meeting'), ('Coding'), ('Code Review'), ('Document'), ('Testing'), ('Support');
+
+-- ===============================
+-- 4. 每日工時紀錄表：WorkLogs
+-- ===============================
+CREATE TABLE WorkLogs (
+    Id INT PRIMARY KEY IDENTITY(1,1),
+    UserId INT NOT NULL,
+    WorkDate DATE NOT NULL,
+    StartTime TIME NOT NULL,
+    EndTime TIME NOT NULL,
+    WorkTypeId INT NOT NULL,
+    Description NVARCHAR(255),
+    CreatedAt DATETIME NOT NULL DEFAULT GETDATE(),
+
+    FOREIGN KEY (UserId) REFERENCES Users(Id),
+    FOREIGN KEY (WorkTypeId) REFERENCES WorkTypes(Id)
+);

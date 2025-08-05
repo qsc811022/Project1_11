@@ -1,60 +1,141 @@
 <!DOCTYPE html>
-<html lang="zh-Hant">
-
+<html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <title>WorkLog 系統</title>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@500;700&display=swap" rel="stylesheet">
-    <style>
-        body {
-            font-family: 'Noto Sans TC', sans-serif;
-            background: #f0f4f8;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-        }
-
-        .container {
-            text-align: center;
-            background: #fff;
-            padding: 40px 60px;
-            border-radius: 16px;
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
-        }
-
-        h2 {
-            margin-bottom: 24px;
-            font-size: 28px;
-            color: #333;
-        }
-
-        button {
-            margin: 10px;
-            padding: 10px 20px;
-            font-size: 16px;
-            border: none;
-            border-radius: 8px;
-            background-color: #4CAF50;
-            color: white;
-            cursor: pointer;
-            transition: background-color 0.2s ease-in-out;
-        }
-
-        button:hover {
-            background-color: #45a049;
-        }
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>工時管理系統</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
-
 <body>
     <div class="container">
-        <h2>歡迎使用 WorkLog 系統</h2>
-        <button onclick="location.href='/login.html'">登入</button>
-        <button onclick="location.href='/register.html'">註冊</button>
-    </div>
-</body>
+        <button id="logoutBtn" class="btn btn-secondary logout-btn hidden">登出</button>
+        
+        <div class="header">
+            <h1>📊 工時管理系統</h1>
+            <p>記錄您的每日工作時間</p>
+        </div>
 
+        <div id="userInfo" class="user-info hidden">
+            <h3>歡迎，<span id="userName"></span>！</h3>
+            <p>身份：<span id="userRole"></span></p>
+        </div>
+
+        <!-- 登入/註冊表單 -->
+        <div id="authSection">
+            <div class="nav-tabs">
+                <button class="nav-tab active" onclick="switchTab('login')">登入</button>
+                <button class="nav-tab" onclick="switchTab('register')">註冊</button>
+            </div>
+
+            <div id="loginTab" class="tab-content active">
+                <form id="loginForm">
+                    <div class="form-group">
+                        <label for="loginUsername">使用者名稱</label>
+                        <input type="text" id="loginUsername" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="loginPassword">密碼</label>
+                        <input type="password" id="loginPassword" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">登入</button>
+                </form>
+            </div>
+
+            <div id="registerTab" class="tab-content">
+                <form id="registerForm">
+                    <div class="form-group">
+                        <label for="registerUsername">使用者名稱</label>
+                        <input type="text" id="registerUsername" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="registerPassword">密碼</label>
+                        <input type="password" id="registerPassword" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="confirmPassword">確認密碼</label>
+                        <input type="password" id="confirmPassword" required>
+                    </div>
+                    <button type="submit" class="btn btn-success">註冊</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- 主要功能區 -->
+        <div id="mainSection" class="hidden">
+            <div class="nav-tabs">
+                <button class="nav-tab active" onclick="switchMainTab('worklog')">工時記錄</button>
+                <button class="nav-tab" onclick="switchMainTab('report')">週報檢視</button>
+                <button id="adminTabBtn" class="nav-tab hidden" onclick="switchMainTab('admin')">管理者面板</button>
+            </div>
+
+            <!-- 工時記錄 -->
+            <div id="worklogTab" class="tab-content active">
+                <h3>新增工時記錄</h3>
+                <form id="worklogForm">
+                    <div class="form-group">
+                        <label for="workDate">工作日期</label>
+                        <input type="date" id="workDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="startTime">開始時間</label>
+                        <input type="time" id="startTime" value="09:00" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="endTime">結束時間</label>
+                        <input type="time" id="endTime" value="18:00" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="workType">工作類型</label>
+                        <select id="workType" required></select>
+                    </div>
+                    <div class="form-group">
+                        <label for="description">工作描述</label>
+                        <textarea id="description" rows="3" placeholder="請描述今日的工作內容..."></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">新增記錄</button>
+                </form>
+
+                <h3 style="margin-top: 2rem;">最近記錄</h3>
+                <div id="recentWorklogs"></div>
+            </div>
+
+            <!-- 週報檢視 -->
+            <div id="reportTab" class="tab-content">
+                <h3>週報檢視</h3>
+                <div class="week-selector">
+                    <label for="weekStart">選擇週別：</label>
+                    <input type="date" id="weekStart">
+                    <button class="btn btn-primary" onclick="loadWeeklyReport()">載入週報</button>
+                    <button class="btn btn-secondary" onclick="exportWeeklyPDF()">匯出 PDF</button>
+                </div>
+
+                <div id="weeklySummary" class="weekly-summary hidden">
+                    <h4>本週工時統計</h4>
+                    <div id="summaryContent"></div>
+                </div>
+
+                <div id="weeklyDetails"></div>
+            </div>
+
+            <!-- 管理者面板 -->
+            <div id="adminTab" class="tab-content">
+                <h3>管理者面板</h3>
+                <div class="week-selector">
+                    <label for="adminWeekStart">選擇週別：</label>
+                    <input type="date" id="adminWeekStart">
+                    <button class="btn btn-primary" onclick="loadAllWorklogs()">載入資料</button>
+                    <button class="btn btn-secondary" onclick="exportAllData()">匯出全員資料</button>
+                </div>
+                <div id="allWorklogs"></div>
+            </div>
+        </div>
+
+        <div id="alertContainer"></div>
+    </div>
+
+    <script src="js/app.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/worklog.js"></script>
+    <script src="js/admin.js"></script>
+</body>
 </html>

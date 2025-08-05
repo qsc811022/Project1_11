@@ -1,28 +1,33 @@
+// server.js - 主要伺服器檔案
 const express = require('express');
 const cors = require('cors');
+const path = require('path');
+const { connectDB } = require('./config/db');
+const authRoutes = require('./routes/auth');
+const worklogRoutes = require('./routes/worklogs');
+const adminRoutes = require('./routes/admin');
+
 const app = express();
-require('dotenv').config(); // 確保 dotenv 在最前面載入
+const PORT = process.env.PORT || 3000;
 
-
+// 中介軟體
 app.use(cors());
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.static('public'));
 
-// ✅ 正確掛載 router
-const weeklyReportsRouter = require('./routes/weeklyReports');
-const authRoutes = require('./routes/auth');
-const workLogsRoute = require("./routes/workLogs");
-const userRoutes = require('./routes/users');
-app.use("/api/users", userRoutes);
+// 連接資料庫
+connectDB();
+
+// 路由
 app.use('/api/auth', authRoutes);
-app.use('/api/weeklyReports', weeklyReportsRouter);
-app.use("/api/workLogs", workLogsRoute);
+app.use('/api/worklogs', worklogRoutes);
+app.use('/api/admin', adminRoutes);
 
-
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`🚀 Server is running on http://localhost:${PORT}`);
+// 提供靜態檔案
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-const path = require('path');
-app.use(express.static(path.join(__dirname, 'public'))); // 如果 login.html 放在 public 資料夾
+app.listen(PORT, () => {
+    console.log(`伺服器運行於 http://localhost:${PORT}`);
+});
