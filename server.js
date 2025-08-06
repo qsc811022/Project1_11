@@ -2,10 +2,6 @@
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
-const { connectDB } = require('./config/db');
-const authRoutes = require('./routes/auth');
-const worklogRoutes = require('./routes/worklogs');
-const adminRoutes = require('./routes/admin');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -19,10 +15,6 @@ app.use(express.static('public'));
 connectDB();
 
 // 路由
-app.use('/api/auth', authRoutes);
-app.use('/api/worklogs', worklogRoutes);
-app.use('/api/admin', adminRoutes);
-
 // 提供靜態檔案
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
